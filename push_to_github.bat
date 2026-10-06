@@ -9,7 +9,7 @@ echo.
 
 git init
 git add .
-git commit -m "Initial commit: Mumbai Local Development Dashboard"
+git commit -m "Add Streamlit Cloud dashboard support (streamlit_app.py)"
 git branch -M main
 git remote remove origin 2>nul
 git remote add origin https://github.com/fulwariyalokesh7-create/mumbai-local-development-dashboard.git
@@ -19,6 +19,6 @@ git push -u origin main
 
 echo.
 echo ========================================================
-echo  Completed! Refresh your GitHub page to see your project!
+echo  Completed! Refresh your GitHub and Streamlit Cloud!
 echo ========================================================
 pause

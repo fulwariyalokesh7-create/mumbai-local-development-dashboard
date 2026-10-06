@@ -7,7 +7,18 @@ Backend: app.py
 
 import os
 import json
+import sys
 import pandas as pd
+
+# If executed via Streamlit Cloud (e.g. streamlit run app.py)
+try:
+    import streamlit.runtime
+    if streamlit.runtime.exists():
+        import streamlit_app
+        sys.exit(0)
+except Exception:
+    pass
+
 from flask import Flask, render_template, request, jsonify, abort
 
 import analysis

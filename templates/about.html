@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}About Project & Viva Guide | Mumbai Local Development Dashboard{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container-fluid px-4">
+        <h1>About the Project & Methodology</h1>
+        <p>B.Sc Data Science Academic Project Documentation & Viva Preparation Guide</p>
+    </div>
+</section>
+
+<div class="container-fluid px-4 mb-5">
+    <div class="row g-4">
+        <!-- Main Documentation Column -->
+        <div class="col-lg-8">
+            <!-- 1. Executive Summary -->
+            <div class="card card-custom mb-4">
+                <div class="card-header">
+                    <span><i class="fa-solid fa-graduation-cap me-2 text-primary"></i> 1. Project Overview & Problem Statement</span>
+                </div>
+                <div class="card-body">
+                    <p>
+                        The <strong>Mumbai Local Development Dashboard — Ward-Level Visualization</strong> is an academic Data Science web application developed to analyze and visualize municipal development indicators across the 24 administrative municipal wards of Mumbai.
+                    </p>
+                    <p>
+                        <strong>Problem Statement:</strong> While municipal and census data for Greater Mumbai is published across several reports and portals, it is frequently siloed in dense PDF tables and disjointed municipal releases. Citizens, researchers, and students lack a unified, beginner-friendly data platform to benchmark infrastructure, health, education, and sanitation equity at the ward level.
+                    </p>
+                    <p>
+                        <strong>Project Goal:</strong> Execute an end-to-end Data Science pipeline:
+                        <br>
+                        <code>Data Collection → Data Cleaning → Normalization → Sub-Indicator Feature Engineering → Composite Scoring → Interactive Visualization → Web Interface</code>.
+                    </p>
+                </div>
+            </div>
+
+            <!-- 2. Data Sources & Ethical Citation -->
+            <div class="card card-custom mb-4">
+                <div class="card-header">
+                    <span><i class="fa-solid fa-database me-2 text-primary"></i> 2. Official Data Sources & Baseline Attribution</span>
+                </div>
+                <div class="card-body">
+                    <p class="small text-muted">All baseline demographic, geographic, and municipal indicators are sourced from authentic public records:</p>
+                    <div class="table-responsive">
+                        <table class="table table-custom table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Data Attribute</th>
+                                    <th>Primary Official Source</th>
+                                    <th>Published Agency</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Ward Names, Boundaries & Population</td>
+                                    <td>District Census Handbook — Mumbai & Suburban</td>
+                                    <td>Census of India (Office of Registrar General)</td>
+                                </tr>
+                                <tr>
+                                    <td>Geographic Area (sq km) & Density</td>
+                                    <td>Administrative Ward Profiles (24 Wards: A to T)</td>
+                                    <td>Brihanmumbai Municipal Corporation (BMC / MCGM)</td>
+                                </tr>
+                                <tr>
+                                    <td>Road Length, Water Supply & Drainage</td>
+                                    <td>Environment Status Report (ESR) & Civic Works</td>
+                                    <td>Municipal Corporation of Greater Mumbai (MCGM)</td>
+                                </tr>
+                                <tr>
+                                    <td>Schools, Dispensaries & Public Toilets</td>
+                                    <td>Status of Civic Issues & Public Facilities Reports</td>
+                                    <td>Praja Foundation & BMC Open Municipal Releases</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="alert alert-warning py-2 mb-0 small" role="alert">
+                        <i class="fa-solid fa-triangle-exclamation me-1"></i>
+                        <strong>Ethical Presentation Rule:</strong> This project strictly avoids subjective labels such as "bad" or "backward area." Differences in indicator sub-scores reflect relative municipal access and population density pressure.
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Mathematical Methodology -->
+            <div class="card card-custom mb-4">
+                <div class="card-header">
+                    <span><i class="fa-solid fa-calculator me-2 text-primary"></i> 3. Normalization & Scoring Mathematical Model</span>
+                </div>
+                <div class="card-body">
+                    <h6 class="fw-bold text-primary">A. Why Normalization is Necessary</h6>
+                    <p class="small">
+                        Indicators are recorded across vastly different measurement scales: population exceeds 900,000 in suburban wards, road length is measured in kilometers, while public facility counts range from 10 to 400. Direct summation would cause high-magnitude variables to disproportionately dominate the index.
+                    </p>
+                    <div class="p-3 bg-light rounded mb-3 text-center">
+                        <code class="fs-6">Normalized Value = (Value - Minimum) / (Maximum - Minimum)</code>
+                        <div class="text-secondary small mt-1">Transforms all metrics linearly into a standard 0 to 1 domain.</div>
+                    </div>
+
+                    <h6 class="fw-bold text-primary">B. Composite Development Score Formula</h6>
+                    <p class="small">
+                        The composite <strong>Development Score</strong> is calculated as an explainable weighted linear sum of six standardized municipal pillars (scaled from 0 to 100):
+                    </p>
+                    <div class="p-3 bg-light rounded text-center mb-3">
+                        <code class="fs-6 text-dark">
+                            Development Score = (0.25 × Infrastructure) + (0.20 × Health) + (0.20 × Education) + (0.15 × Sanitation) + (0.10 × Environment) + (0.10 × Public Services)
+                        </code>
+                    </div>
+
+                    <h6 class="fw-bold text-primary">C. Project-Defined Categorization Thresholds</h6>
+                    <ul class="small mb-0">
+                        <li><strong>High Development:</strong> Composite Score &ge; 65.0</li>
+                        <li><strong>Moderate Development:</strong> 45.0 &le; Composite Score &lt; 65.0</li>
+                        <li><strong>Low Development:</strong> Composite Score &lt; 45.0 (Identified as priority areas for facility expansion)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 4. Viva 5-Minute Pitch Script -->
+            <div class="card card-custom">
+                <div class="card-header">
+                    <span><i class="fa-solid fa-comments me-2 text-success"></i> 4. Viva Voce 5-Minute Explanation Script</span>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>Q1. What is this project in one sentence?</strong>
+                        <p class="text-secondary small mb-0">
+                            "It is an end-to-end Data Science web dashboard that cleans, normalizes, analyzes, and visualizes civic infrastructure and public service indicators across Mumbai's 24 administrative municipal wards."
+                        </p>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Q2. What Data Science algorithms or techniques did you apply?</strong>
+                        <p class="text-secondary small mb-0">
+                            "We utilized Pandas and NumPy for missing value verification, population density adjustment, feature engineering of per-capita civic facilities, Min-Max normalization, weighted linear index computation, and Pearson correlation analysis."
+                        </p>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Q3. Why did you use Flask instead of a heavy framework?</strong>
+                        <p class="text-secondary small mb-0">
+                            "Flask is lightweight and beginner-friendly. It allows our Python data analysis logic (Pandas/NumPy) to directly communicate with HTML5/Chart.js frontends without over-engineering."
+                        </p>
+                    </div>
+                    <div>
+                        <strong>Q4. Is the Development Score an official ranking?</strong>
+                        <p class="text-secondary small mb-0">
+                            "No, it is explicitly a project-defined analytical index designed for educational benchmarking, and we have clearly documented all indicator weights and assumptions."
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar / Architecture & Tech Stack -->
+        <div class="col-lg-4">
+            <!-- Tech Stack Card -->
+            <div class="card card-custom mb-4">
+                <div class="card-header">
+                    <span><i class="fa-solid fa-microchip me-2 text-primary"></i> Technology Stack</span>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0 small">
+                        <li class="mb-2"><strong>Data Science:</strong> Python 3, Pandas, NumPy, Matplotlib</li>
+                        <li class="mb-2"><strong>Web Backend:</strong> Flask (Python WSGI)</li>
+                        <li class="mb-2"><strong>Frontend:</strong> HTML5, CSS3, JavaScript (ES6)</li>
+                        <li class="mb-2"><strong>UI Framework:</strong> Bootstrap 5.3</li>
+                        <li class="mb-2"><strong>Charts:</strong> Chart.js 4.4</li>
+                        <li class="mb-2"><strong>Database:</strong> MySQL + <code>mysql-connector-python</code></li>
+                        <li><strong>Reporting:</strong> Microsoft Excel & Power BI</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Limitations -->
+            <div class="card card-custom mb-4">
+                <div class="card-header">
+                    <span><i class="fa-solid fa-triangle-exclamation me-2 text-warning"></i> Project Limitations</span>
+                </div>
+                <div class="card-body small text-secondary">
+                    <ul class="ps-3 mb-0">
+                        <li class="mb-2">Census population figures represent official baseline figures; informal settlements experience continuous flux.</li>
+                        <li class="mb-2">Indicator weights are analytical choices based on civic domain study, not government policy mandates.</li>
+                        <li class="mb-2">Statistical correlation does not necessarily imply direct causation.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Future Scope -->
+            <div class="card card-custom">
+                <div class="card-header">
+                    <span><i class="fa-solid fa-rocket me-2 text-primary"></i> Future Scope</span>
+                </div>
+                <div class="card-body small text-secondary">
+                    <ul class="ps-3 mb-0">
+                        <li class="mb-2">Incorporate time-series multi-year trends to visualize year-over-year civic progress.</li>
+                        <li class="mb-2">Integrate high-resolution GIS shapefiles using GeoPandas / Leaflet.</li>
+                        <li class="mb-2">Automate live municipal data ingestion via government open-data APIs.</li>
+                        <li>Add citizen feedback sentiment analysis as a qualitative development metric.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

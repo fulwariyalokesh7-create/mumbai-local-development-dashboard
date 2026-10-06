@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Ward Data Directory | Mumbai Local Development Dashboard{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container-fluid px-4">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1>Mumbai Administrative Wards Dataset</h1>
+                <p>Complete dataset of 24 municipal wards with civic indicators and project-defined scores</p>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <span class="badge bg-secondary fs-6">Showing {{ total_count }} Wards</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container-fluid px-4 mb-5">
+    <!-- Filter and Search Bar -->
+    <div class="card card-custom mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('wards_page') }}" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold text-secondary">Search Ward Name or ID</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                        <input type="text" id="wardSearchInput" class="form-control" placeholder="Type to filter instantly (e.g. Colaba, Bandra, K/West)...">
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold text-secondary">Filter by Zone</label>
+                    <select name="zone" class="form-select" onchange="this.form.submit()">
+                        <option value="">All Administrative Zones</option>
+                        {% for z in zones %}
+                        <option value="{{ z }}" {% if selected_zone == z %}selected{% endif %}>{{ z }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold text-secondary">Filter by Category</label>
+                    <select name="category" class="form-select" onchange="this.form.submit()">
+                        <option value="">All Development Categories</option>
+                        {% for c in categories %}
+                        <option value="{{ c }}" {% if selected_cat == c %}selected{% endif %}>{{ c }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <a href="{{ url_for('wards_page') }}" class="btn btn-outline-secondary w-100">
+                        <i class="fa-solid fa-rotate-left me-1"></i> Reset
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Ward Table Card -->
+    <div class="card card-custom">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-custom table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Ward</th>
+                            <th>Locality / Name</th>
+                            <th>Zone</th>
+                            <th class="text-end">Population</th>
+                            <th class="text-end">Area (km²)</th>
+                            <th class="text-end">Density (/km²)</th>
+                            <th class="text-center">Infra</th>
+                            <th class="text-center">Health</th>
+                            <th class="text-center">Edu</th>
+                            <th class="text-center">Env</th>
+                            <th class="text-center">Dev Score</th>
+                            <th>Category</th>
+                            <th class="text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="wardTableBody">
+                        {% for w in wards %}
+                        <tr>
+                            <td><strong>Ward {{ w.Ward_ID }}</strong></td>
+                            <td>{{ w.Ward_Name }}</td>
+                            <td><small class="text-muted">{{ w.Zone }}</small></td>
+                            <td class="text-end">{{ "{:,}".format(w.Population) }}</td>
+                            <td class="text-end">{{ w.Area_sq_km }}</td>
+                            <td class="text-end">{{ "{:,}".format(w.Population_Density) }}</td>
+                            <td class="text-center">{{ w.Infrastructure_Score }}</td>
+                            <td class="text-center">{{ w.Health_Score }}</td>
+                            <td class="text-center">{{ w.Education_Score }}</td>
+                            <td class="text-center">{{ w.Environment_Score }}</td>
+                            <td class="text-center">
+                                <strong class="text-primary">{{ w.Development_Score }}</strong>
+                            </td>
+                            <td>
+                                {% if w.Development_Category == 'High Development' %}
+                                <span class="badge-category badge-high">{{ w.Development_Category }}</span>
+                                {% elif w.Development_Category == 'Moderate Development' %}
+                                <span class="badge-category badge-mod">{{ w.Development_Category }}</span>
+                                {% else %}
+                                <span class="badge-category badge-low">{{ w.Development_Category }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <a href="{{ url_for('ward_detail', ward_id=w.Ward_ID) }}" class="btn btn-outline-primary btn-sm py-0 px-2">
+                                    Profile <i class="fa-solid fa-arrow-right small ms-1"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

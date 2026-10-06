@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block title %}Ward Comparison | Mumbai Local Development Dashboard{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container-fluid px-4">
+        <h1>Ward Comparison Analysis</h1>
+        <p>Interactive comparative analysis between any two Mumbai municipal wards</p>
+    </div>
+</section>
+
+<div class="container-fluid px-4 mb-5">
+    <!-- Selector Bar -->
+    <div class="card card-custom mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('compare_page') }}" class="row g-3 align-items-end">
+                <div class="col-md-5">
+                    <label class="form-label fw-semibold text-primary">
+                        <i class="fa-solid fa-square text-primary me-1"></i> Select First Ward (Ward A)
+                    </label>
+                    <select name="ward_a" class="form-select">
+                        {% for w in all_wards %}
+                        <option value="{{ w.Ward_ID }}" {% if w.Ward_ID == ward_a.Ward_ID %}selected{% endif %}>
+                            Ward {{ w.Ward_ID }} — {{ w.Ward_Name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-5">
+                    <label class="form-label fw-semibold text-teal" style="color: #0d9488;">
+                        <i class="fa-solid fa-square me-1" style="color: #0d9488;"></i> Select Second Ward (Ward B)
+                    </label>
+                    <select name="ward_b" class="form-select">
+                        {% for w in all_wards %}
+                        <option value="{{ w.Ward_ID }}" {% if w.Ward_ID == ward_b.Ward_ID %}selected{% endif %}>
+                            Ward {{ w.Ward_ID }} — {{ w.Ward_Name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fa-solid fa-arrows-rotate me-1"></i> Compare
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Comparative Overview Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="card card-custom border-primary h-100">
+                <div class="card-header bg-primary text-white">
+                    <strong>Ward {{ ward_a.Ward_ID }} — {{ ward_a.Ward_Name }}</strong>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-secondary">Development Score</span>
+                        <span class="fs-3 fw-bold text-primary">{{ ward_a.Development_Score }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-secondary">Category</span>
+                        <span class="badge-category {% if ward_a.Development_Category == 'High Development' %}badge-high{% elif ward_a.Development_Category == 'Moderate Development' %}badge-mod{% else %}badge-low{% endif %}">
+                            {{ ward_a.Development_Category }}
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-secondary">Zone</span>
+                        <span>{{ ward_a.Zone }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-secondary">Population</span>
+                        <strong>{{ "{:,}".format(ward_a.Population) }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-secondary">Population Density</span>
+                        <strong>{{ "{:,}".format(ward_a.Population_Density) }} / km²</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card card-custom h-100" style="border-color: #0d9488;">
+                <div class="card-header text-white" style="background-color: #0d9488;">
+                    <strong>Ward {{ ward_b.Ward_ID }} — {{ ward_b.Ward_Name }}</strong>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-secondary">Development Score</span>
+                        <span class="fs-3 fw-bold" style="color: #0d9488;">{{ ward_b.Development_Score }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-secondary">Category</span>
+                        <span class="badge-category {% if ward_b.Development_Category == 'High Development' %}badge-high{% elif ward_b.Development_Category == 'Moderate Development' %}badge-mod{% else %}badge-low{% endif %}">
+                            {{ ward_b.Development_Category }}
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-secondary">Zone</span>
+                        <span>{{ ward_b.Zone }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-secondary">Population</span>
+                        <strong>{{ "{:,}".format(ward_b.Population) }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-secondary">Population Density</span>
+                        <strong>{{ "{:,}".format(ward_b.Population_Density) }} / km²</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart & Table Row -->
+    <div class="row g-3">
+        <!-- Comparison Bar Chart -->
+        <div class="col-lg-6">
+            <div class="card card-custom h-100">
+                <div class="card-header">
+                    <span><i class="fa-solid fa-chart-column me-2 text-primary"></i> Indicators Comparison Bar Chart</span>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="height: 380px;">
+                        <canvas id="chartComparison"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparative Metrics Table -->
+        <div class="col-lg-6">
+            <div class="card card-custom h-100">
+                <div class="card-header">
+                    <span><i class="fa-solid fa-table-columns me-2 text-primary"></i> Side-by-Side Indicator Comparison</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-custom table-bordered mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Indicator</th>
+                                    <th class="text-center text-primary">Ward {{ ward_a.Ward_ID }}</th>
+                                    <th class="text-center" style="color: #0d9488;">Ward {{ ward_b.Ward_ID }}</th>
+                                    <th class="text-center">Difference</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Development Score</strong></td>
+                                    <td class="text-center fw-bold">{{ ward_a.Development_Score }}</td>
+                                    <td class="text-center fw-bold">{{ ward_b.Development_Score }}</td>
+                                    <td class="text-center">
+                                        {% set diff = (ward_a.Development_Score - ward_b.Development_Score)|round(1) %}
+                                        <span class="badge {% if diff >= 0 %}bg-primary{% else %}bg-secondary{% endif %}">
+                                            {% if diff > 0 %}+{% endif %}{{ diff }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Infrastructure Score</td>
+                                    <td class="text-center">{{ ward_a.Infrastructure_Score }}</td>
+                                    <td class="text-center">{{ ward_b.Infrastructure_Score }}</td>
+                                    <td class="text-center">{{ (ward_a.Infrastructure_Score - ward_b.Infrastructure_Score)|round(1) }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Health Score</td>
+                                    <td class="text-center">{{ ward_a.Health_Score }}</td>
+                                    <td class="text-center">{{ ward_b.Health_Score }}</td>
+                                    <td class="text-center">{{ (ward_a.Health_Score - ward_b.Health_Score)|round(1) }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Education Score</td>
+                                    <td class="text-center">{{ ward_a.Education_Score }}</td>
+                                    <td class="text-center">{{ ward_b.Education_Score }}</td>
+                                    <td class="text-center">{{ (ward_a.Education_Score - ward_b.Education_Score)|round(1) }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Sanitation Score</td>
+                                    <td class="text-center">{{ ward_a.Sanitation_Score }}</td>
+                                    <td class="text-center">{{ ward_b.Sanitation_Score }}</td>
+                                    <td class="text-center">{{ (ward_a.Sanitation_Score - ward_b.Sanitation_Score)|round(1) }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Environment Score</td>
+                                    <td class="text-center">{{ ward_a.Environment_Score }}</td>
+                                    <td class="text-center">{{ ward_b.Environment_Score }}</td>
+                                    <td class="text-center">{{ (ward_a.Environment_Score - ward_b.Environment_Score)|round(1) }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Schools Count</td>
+                                    <td class="text-center">{{ ward_a.Schools_Count }}</td>
+                                    <td class="text-center">{{ ward_b.Schools_Count }}</td>
+                                    <td class="text-center">{{ ward_a.Schools_Count - ward_b.Schools_Count }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Hospitals & Health Centers</td>
+                                    <td class="text-center">{{ ward_a.Hospitals_Count + ward_a.Health_Centres_Count }}</td>
+                                    <td class="text-center">{{ ward_b.Hospitals_Count + ward_b.Health_Centres_Count }}</td>
+                                    <td class="text-center">{{ (ward_a.Hospitals_Count + ward_a.Health_Centres_Count) - (ward_b.Hospitals_Count + ward_b.Health_Centres_Count) }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Parks & Open Spaces</td>
+                                    <td class="text-center">{{ ward_a.Parks_Count }}</td>
+                                    <td class="text-center">{{ ward_b.Parks_Count }}</td>
+                                    <td class="text-center">{{ ward_a.Parks_Count - ward_b.Parks_Count }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const compData = {{ chart_data | safe }};
+    document.addEventListener("DOMContentLoaded", function() {
+        initCompareChart(compData);
+    });
+</script>
+{% endblock %}

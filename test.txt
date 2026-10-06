@@ -1,0 +1,3 @@
+Mumbai Local Development Dashboard
+Project Initialized Successfully.
+Run 'python app.py' or double click 'run_dashboard.bat' to launch the web dashboard.

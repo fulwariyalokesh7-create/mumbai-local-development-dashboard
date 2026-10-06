@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | Mumbai Local Development Dashboard{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="page-header">
+    <div class="container-fluid px-4">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1>Mumbai Local Development Dashboard</h1>
+                <p>Ward-Level Data Visualization & Civic Development Insights across 24 Municipal Wards</p>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <a href="{{ url_for('wards_page') }}" class="btn btn-outline-primary btn-sm me-2">
+                    <i class="fa-solid fa-table me-1"></i> View All Wards
+                </a>
+                <a href="{{ url_for('compare_page') }}" class="btn btn-primary btn-sm">
+                    <i class="fa-solid fa-code-compare me-1"></i> Compare Wards
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container-fluid px-4 mb-4">
+    <!-- KPI Cards Row -->
+    <div class="row g-3 mb-4">
+        <div class="col-xl col-md-4 col-sm-6">
+            <div class="card card-custom kpi-card h-100">
+                <div class="card-body">
+                    <div class="kpi-label"><i class="fa-solid fa-map-location-dot me-1"></i> Total Wards</div>
+                    <div class="kpi-value">{{ kpi.total_wards }}</div>
+                    <div class="kpi-subtext">Administrative Zones (1 to 7)</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl col-md-4 col-sm-6">
+            <div class="card card-custom kpi-card kpi-teal h-100">
+                <div class="card-body">
+                    <div class="kpi-label"><i class="fa-solid fa-users me-1"></i> Total Population</div>
+                    <div class="kpi-value">{{ "{:,}".format(kpi.total_population) }}</div>
+                    <div class="kpi-subtext">Avg: {{ "{:,}".format(kpi.avg_population|int) }} / ward</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl col-md-4 col-sm-6">
+            <div class="card card-custom kpi-card h-100">
+                <div class="card-body">
+                    <div class="kpi-label"><i class="fa-solid fa-chart-simple me-1"></i> Avg Development Score</div>
+                    <div class="kpi-value text-primary">{{ kpi.avg_development_score }} <small class="fs-6 text-muted">/ 100</small></div>
+                    <div class="kpi-subtext">Project-defined benchmark</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl col-md-6 col-sm-6">
+            <div class="card card-custom kpi-card kpi-green h-100">
+                <div class="card-body">
+                    <div class="kpi-label"><i class="fa-solid fa-arrow-trend-up me-1 text-success"></i> Highest Score Ward</div>
+                    <div class="kpi-value text-success fs-4">{{ kpi.highest_dev_ward }}</div>
+                    <div class="kpi-subtext">Score: <strong>{{ kpi.highest_dev_score }}</strong> (High Development)</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl col-md-6 col-sm-6">
+            <div class="card card-custom kpi-card kpi-amber h-100">
+                <div class="card-body">
+                    <div class="kpi-label"><i class="fa-solid fa-circle-exclamation me-1 text-warning"></i> Lowest Score Ward</div>
+                    <div class="kpi-value text-danger fs-4">{{ kpi.lowest_dev_ward }}</div>
+                    <div class="kpi-subtext">Score: <strong>{{ kpi.lowest_dev_score }}</strong> (Priority Attention)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Ward Directory Navigation Grid -->
+    <div class="card card-custom mb-4">
+        <div class="card-header">
+            <span><i class="fa-solid fa-compass me-2 text-primary"></i> 24 Mumbai Administrative Wards Directory (Click to inspect profile)</span>
+            <small class="text-muted">Color indicates Project-defined Category</small>
+        </div>
+        <div class="card-body">
+            <div class="row g-2">
+                {% for w in wards %}
+                <div class="col-lg-2 col-md-3 col-sm-4 col-6">
+                    <a href="{{ url_for('ward_detail', ward_id=w.Ward_ID) }}" class="btn btn-outline-secondary btn-sm w-100 text-truncate text-start d-flex justify-content-between align-items-center">
+                        <span><strong>Ward {{ w.Ward_ID }}</strong></span>
+                        <i class="fa-solid fa-chevron-right text-muted small"></i>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 1 -->
+    <div class="row g-3 mb-4">
+        <!-- Chart 1: Wards Ranked by Development Score -->
+        <div class="col-lg-7">
+            <div class="card card-custom h-100">
+                <div class="card-header">
+                    <span><i class="fa-solid fa-ranking-star me-2 text-primary"></i> Ward Ranking by Development Score</span>
+                    <small class="text-muted">Min-Max Normalized Sub-Scores</small>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="height: 480px;">
+                        <canvas id="chartDevScore"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart 5 & Key Insights Column -->
+        <div class="col-lg-5">
+            <div class="card card-custom mb-3">
+                <div class="card-header">
+                    <span><i class="fa-solid fa-pie-chart me-2 text-primary"></i> Development Categories</span>
+                    <small class="text-muted">High (&ge;65) | Mod (45-64) | Low (&lt;45)</small>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="height: 190px;">
+                        <canvas id="chartCategory"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dynamic Data-Driven Insights -->
+            <div class="card card-custom">
+                <div class="card-header">
+                    <span><i class="fa-solid fa-lightbulb me-2 text-warning"></i> Key Data-Driven Insights</span>
+                    <span class="badge bg-primary">Calculated</span>
+                </div>
+                <div class="card-body" style="max-height: 235px; overflow-y: auto;">
+                    {% for insight in insights %}
+                    <div class="insight-item">
+                        <strong>{{ insight.category }}:</strong> {{ insight.text }}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 2 -->
+    <div class="row g-3 mb-4">
+        <!-- Chart 2: Population by Ward -->
+        <div class="col-lg-6">
+            <div class="card card-custom h-100">
+                <div class="card-header">
+                    <span><i class="fa-solid fa-people-roof me-2 text-primary"></i> Population by Ward</span>
+                    <small class="text-muted">Census of India Official Figures</small>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="height: 300px;">
+                        <canvas id="chartPopulation"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart 6: Population Density vs Development Score -->
+        <div class="col-lg-6">
+            <div class="card card-custom h-100">
+                <div class="card-header">
+                    <span><i class="fa-solid fa-braille me-2 text-primary"></i> Population Density vs. Development Score</span>
+                    <small class="text-muted">Scatter Analysis (Pressure vs Infrastructure)</small>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="height: 300px;">
+                        <canvas id="chartScatter"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 3 -->
+    <div class="row g-3">
+        <!-- Chart 3: Infrastructure Coverage -->
+        <div class="col-lg-6">
+            <div class="card card-custom h-100">
+                <div class="card-header">
+                    <span><i class="fa-solid fa-faucet-drip me-2 text-primary"></i> Infrastructure Coverage Breakdown</span>
+                    <small class="text-muted">Water, Drainage, and Waste Collection %</small>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="height: 300px;">
+                        <canvas id="chartInfrastructure"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart 4: Public Facilities Count -->
+        <div class="col-lg-6">
+            <div class="card card-custom h-100">
+                <div class="card-header">
+                    <span><i class="fa-solid fa-school-flag me-2 text-primary"></i> Public Facilities Distribution</span>
+                    <small class="text-muted">Schools, Healthcare, and Parks</small>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="height: 300px;">
+                        <canvas id="chartFacilities"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Embed JSON chart data safely into frontend JS
+    const dashboardData = {{ chart_data | safe }};
+    document.addEventListener("DOMContentLoaded", function() {
+        initDashboardCharts(dashboardData);
+    });
+</script>
+{% endblock %}

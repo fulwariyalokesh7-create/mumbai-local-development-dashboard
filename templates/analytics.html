@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+
+{% block title %}Civic Analytics | Mumbai Local Development Dashboard{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container-fluid px-4">
+        <h1>Civic Development Analytics</h1>
+        <p>Statistical summaries, zone-level aggregations, and correlation analysis across Mumbai</p>
+    </div>
+</section>
+
+<div class="container-fluid px-4 mb-5">
+    <!-- Correlation Matrix Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3 col-sm-6">
+            <div class="card card-custom h-100">
+                <div class="card-body">
+                    <div class="kpi-label"><i class="fa-solid fa-arrows-split-up-and-left me-1"></i> Density vs. Score</div>
+                    <div class="kpi-value {% if correlations.density_vs_dev_score < 0 %}text-danger{% else %}text-primary{% endif %}">
+                        {{ correlations.density_vs_dev_score }}
+                    </div>
+                    <div class="kpi-subtext">Pearson Correlation (r)</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="card card-custom h-100">
+                <div class="card-body">
+                    <div class="kpi-label"><i class="fa-solid fa-road me-1"></i> Infra vs. Score</div>
+                    <div class="kpi-value text-success">+{{ correlations.infra_vs_dev_score }}</div>
+                    <div class="kpi-subtext">Strong positive correlation</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="card card-custom h-100">
+                <div class="card-body">
+                    <div class="kpi-label"><i class="fa-solid fa-heart-pulse me-1"></i> Health vs. Score</div>
+                    <div class="kpi-value text-info">+{{ correlations.health_vs_dev_score }}</div>
+                    <div class="kpi-subtext">Moderate-to-high correlation</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="card card-custom h-100">
+                <div class="card-body">
+                    <div class="kpi-label"><i class="fa-solid fa-graduation-cap me-1"></i> Education vs. Score</div>
+                    <div class="kpi-value text-primary">+{{ correlations.edu_vs_dev_score }}</div>
+                    <div class="kpi-subtext">Moderate positive correlation</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Zone-Level Aggregations Table -->
+    <div class="card card-custom mb-4">
+        <div class="card-header">
+            <span><i class="fa-solid fa-layer-group me-2 text-primary"></i> Zone-Level Development Summary</span>
+            <small class="text-muted">Aggregated across all 7 Mumbai Administrative Zones</small>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-custom table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Zone</th>
+                            <th class="text-center">Wards</th>
+                            <th class="text-end">Total Population</th>
+                            <th class="text-end">Avg Density (/km²)</th>
+                            <th class="text-center">Avg Infra Score</th>
+                            <th class="text-center">Avg Health Score</th>
+                            <th class="text-center">Avg Edu Score</th>
+                            <th class="text-center">Avg Dev Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for z in zone_stats %}
+                        <tr>
+                            <td><strong>{{ z.Zone }}</strong></td>
+                            <td class="text-center">{{ z.Ward_Count }}</td>
+                            <td class="text-end">{{ "{:,}".format(z.Total_Population) }}</td>
+                            <td class="text-end">{{ "{:,}".format(z.Avg_Density|int) }}</td>
+                            <td class="text-center">{{ z.Avg_Infra_Score }}</td>
+                            <td class="text-center">{{ z.Avg_Health_Score }}</td>
+                            <td class="text-center">{{ z.Avg_Edu_Score }}</td>
+                            <td class="text-center">
+                                <span class="badge bg-primary fs-6">{{ z.Avg_Dev_Score }}</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rankings Comparison Row -->
+    <div class="row g-3 mb-4">
+        <!-- Top 5 Wards by Score -->
+        <div class="col-lg-6">
+            <div class="card card-custom h-100">
+                <div class="card-header">
+                    <span><i class="fa-solid fa-trophy me-2 text-success"></i> Top 5 Wards by Development Score</span>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-custom mb-0">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Ward</th>
+                                <th>Zone</th>
+                                <th class="text-end">Dev Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for w in top_5 %}
+                            <tr>
+                                <td><span class="badge bg-success">#{{ loop.index }}</span></td>
+                                <td><a href="{{ url_for('ward_detail', ward_id=w.Ward_ID) }}">Ward {{ w.Ward_ID }} ({{ w.Ward_Name.split(' - ')[0] }})</a></td>
+                                <td><small class="text-muted">{{ w.Zone }}</small></td>
+                                <td class="text-end fw-bold text-success">{{ w.Development_Score }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Priority Focus (Lowest 5) Wards -->
+        <div class="col-lg-6">
+            <div class="card card-custom h-100">
+                <div class="card-header">
+                    <span><i class="fa-solid fa-hand-holding-medical me-2 text-danger"></i> Priority Focus Wards (Lower Relative Scores)</span>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-custom mb-0">
+                        <thead>
+                            <tr>
+                                <th>Priority</th>
+                                <th>Ward</th>
+                                <th>Zone</th>
+                                <th class="text-end">Dev Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for w in bottom_5 %}
+                            <tr>
+                                <td><span class="badge bg-danger">Focus {{ loop.index }}</span></td>
+                                <td><a href="{{ url_for('ward_detail', ward_id=w.Ward_ID) }}">Ward {{ w.Ward_ID }} ({{ w.Ward_Name.split(' - ')[0] }})</a></td>
+                                <td><small class="text-muted">{{ w.Zone }}</small></td>
+                                <td class="text-end fw-bold text-danger">{{ w.Development_Score }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Population & Density Hotspots Row -->
+    <div class="row g-3">
+        <!-- Top 5 by Population -->
+        <div class="col-lg-6">
+            <div class="card card-custom h-100">
+                <div class="card-header">
+                    <span><i class="fa-solid fa-users-rectangle me-2 text-primary"></i> Top 5 Most Populated Wards</span>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-custom mb-0">
+                        <thead>
+                            <tr>
+                                <th>Ward</th>
+                                <th>Locality</th>
+                                <th class="text-end">Population</th>
+                                <th class="text-end">Dev Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for w in top_pop %}
+                            <tr>
+                                <td><strong>Ward {{ w.Ward_ID }}</strong></td>
+                                <td>{{ w.Ward_Name.split(' - ')[0] }}</td>
+                                <td class="text-end">{{ "{:,}".format(w.Population) }}</td>
+                                <td class="text-end">{{ w.Development_Score }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top 5 by Density -->
+        <div class="col-lg-6">
+            <div class="card card-custom h-100">
+                <div class="card-header">
+                    <span><i class="fa-solid fa-compress me-2 text-primary"></i> Top 5 Highest Density Wards</span>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-custom mb-0">
+                        <thead>
+                            <tr>
+                                <th>Ward</th>
+                                <th>Locality</th>
+                                <th class="text-end">Density (/km²)</th>
+                                <th class="text-end">Area (km²)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for w in top_density %}
+                            <tr>
+                                <td><strong>Ward {{ w.Ward_ID }}</strong></td>
+                                <td>{{ w.Ward_Name.split(' - ')[0] }}</td>
+                                <td class="text-end fw-bold">{{ "{:,}".format(w.Population_Density) }}</td>
+                                <td class="text-end">{{ w.Area_sq_km }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
